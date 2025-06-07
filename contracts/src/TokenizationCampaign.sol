@@ -22,6 +22,8 @@ contract TokenizationCampaign {
     uint256 sharePrice;
     /// Sets a maximum amount of shares a user can buy if a certain amount of decentralization is desired;
     uint256 maxSharesPerUser;
+    /// Keeps track of how many shares remains to be bought
+    uint256 sharesLeft = 100;
     /// Ending time of the campaign;
     uint256 deadline;
     /// Amount of capital already raised;
@@ -36,6 +38,10 @@ contract TokenizationCampaign {
     /*//////////////////////////////////////////////////////////////////////////
                                   EVENTS
     //////////////////////////////////////////////////////////////////////////*/
+
+    event SharesBought(address indexed user, uint256 sharesAmount, uint256 contributedAmount);
+    event SharesRedeemed(address indexed user, uint256 sharesAmount);
+    event UserRefunded(address indexed user, uint256 amountRedunded);
 
     /*//////////////////////////////////////////////////////////////////////////
                                   MODIFIERS
