@@ -35,6 +35,14 @@ contract TokenizationCampaign {
     /// The assetToken contract
     AssetToken assetToken;
 
+    /// Swith to true once the campaign is fully funded
+    bool public funded = false;
+
+    // Keeps track of how many shares each address has bought;
+    mapping(address => uint256) public sharesAquired;
+    // Keeps track of how much each user contributed;
+    mapping(address => uint256) public amountContributed;
+
     /*//////////////////////////////////////////////////////////////////////////
                                   EVENTS
     //////////////////////////////////////////////////////////////////////////*/
@@ -74,7 +82,10 @@ contract TokenizationCampaign {
         sharePrice = itemPrice / totalShares;
     }
 
-    function buyShares() external {}
+    function buyShares(uint256 _sharesAmount) external {
+        /// function used to allow users to buy shares
+        /// we need checks regarding how many shares are left, deadline, or if the campaign is fully funded
+    }
 
     function redeemShares() external {}
 
