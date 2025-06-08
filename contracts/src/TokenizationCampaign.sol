@@ -2,6 +2,7 @@
 pragma solidity 0.8.28;
 
 import {AssetToken} from "./AssetToken.sol";
+import {IERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 contract TokenizationCampaign {
     /*//////////////////////////////////////////////////////////////////////////
@@ -9,25 +10,29 @@ contract TokenizationCampaign {
     //////////////////////////////////////////////////////////////////////////*/
 
     error TokenizationCampaign__OnlyOrganizer();
+    error TokenizationCampaign__CampaignFullyFunded();
+    error TokenizationCampaign__CampaignHasEnded();
+    error TokenizationCampaign__InvalidSharesAmount();
+    error TokenizationCampaign__TransferFailed();
 
     /*//////////////////////////////////////////////////////////////////////////
                                   VARIABLES
     //////////////////////////////////////////////////////////////////////////*/
 
     /// Desired price for the item that is tokenized
-    uint256 itemPrice;
+    uint256 public itemPrice;
     /// Number of tokens issued for the asset
     uint256 totalShares = 100;
     /// Computed by dividing the itemPrice with the number of tokens issued;
-    uint256 sharePrice;
+    uint256 public sharePrice;
     /// Sets a maximum amount of shares a user can buy if a certain amount of decentralization is desired;
-    uint256 maxSharesPerUser;
+    uint256 public maxSharesPerUser;
     /// Keeps track of how many shares remains to be bought
     uint256 sharesLeft = 100;
     /// Ending time of the campaign;
-    uint256 deadline;
+    uint256 public deadline;
     /// Amount of capital already raised;
-    uint256 totalRaised;
+    uint256 public totalRaised;
     /// Address of the organizer - can administrate the campaign
     address organizer;
     /// Address of the supported token of payment -> USDC ?
@@ -83,8 +88,29 @@ contract TokenizationCampaign {
     }
 
     function buyShares(uint256 _sharesAmount) external {
-        /// function used to allow users to buy shares
-        /// we need checks regarding how many shares are left, deadline, or if the campaign is fully funded
+        /// Checks - that the campaign has not ended, is not fully funded, and the _sharesAmount to be bought is valid;
+        if (block.timestamp >= deadline) revert TokenizationCampaign__CampaignHasEnded();
+        if (funded) revert TokenizationCampaign__CampaignFullyFunded();
+        if (
+            _sharesAmount <= 0 || _sharesAmount > sharesLeft
+                || sharesAquired[msg.sender] + _sharesAmount > maxSharesPerUser
+        ) revert TokenizationCampaign__InvalidSharesAmount();
+
+        /// Effects - Update the database
+
+        sharesAquired[msg.sender] += _sharesAmount;
+        /// compute the amount to be paid in exchange for the shares
+        uint256 amountToContribute = _sharesAmount * sharePrice;
+        amountContributed[msg.sender] += amountToContribute;
+        sharesLeft -= _sharesAmount;
+        totalRaised += amountToContribute;
+        if (sharesLeft == 0) funded = true;
+
+        /// Interaction
+        /// transfer funds from the buyer to the contract
+        bool success = IERC20(paymentToken).transferFrom(msg.sender, address(this), amountToContribute);
+        if (!success) revert TokenizationCampaign__TransferFailed();
+        emit SharesBought(msg.sender, _sharesAmount, amountToContribute);
     }
 
     function redeemShares() external {}
