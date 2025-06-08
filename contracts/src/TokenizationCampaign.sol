@@ -14,6 +14,7 @@ contract TokenizationCampaign {
     error TokenizationCampaign__CampaignHasEnded();
     error TokenizationCampaign__InvalidSharesAmount();
     error TokenizationCampaign__TransferFailed();
+    error TokenizationCampaign__NotFullyFundedYet();
 
     /*//////////////////////////////////////////////////////////////////////////
                                   VARIABLES
@@ -87,6 +88,8 @@ contract TokenizationCampaign {
         sharePrice = itemPrice / totalShares;
     }
 
+    /// Function used to buy shares of the asset
+    /// @param _sharesAmount The amount of shares to be bought
     function buyShares(uint256 _sharesAmount) external {
         /// Checks - that the campaign has not ended, is not fully funded, and the _sharesAmount to be bought is valid;
         if (block.timestamp >= deadline) revert TokenizationCampaign__CampaignHasEnded();
@@ -104,6 +107,7 @@ contract TokenizationCampaign {
         amountContributed[msg.sender] += amountToContribute;
         sharesLeft -= _sharesAmount;
         totalRaised += amountToContribute;
+        /// if all shares have been bought switch funded to true
         if (sharesLeft == 0) funded = true;
 
         /// Interaction
@@ -113,7 +117,19 @@ contract TokenizationCampaign {
         emit SharesBought(msg.sender, _sharesAmount, amountToContribute);
     }
 
-    function redeemShares() external {}
+    function redeemShares() external {
+        /// Checks - check if the campaign was succesful
+        if (!funded) revert TokenizationCampaign__NotFullyFundedYet();
+
+        /// Efects
+
+        uint256 sharesToRedeem = sharesAquired[msg.sender];
+        sharesAquired[msg.sender] = 0;
+
+        /// Interactions - transfer the tokens representing shares to the buyer
+        bool success = assetToken.transfer(msg.sender, sharesToRedeem);
+        if (!success) revert TokenizationCampaign__TransferFailed();
+    }
 
     function refund() external {}
 
