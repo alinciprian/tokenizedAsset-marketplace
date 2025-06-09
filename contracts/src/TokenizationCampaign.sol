@@ -114,6 +114,8 @@ contract TokenizationCampaign {
         /// transfer funds from the buyer to the contract
         bool success = IERC20(paymentToken).transferFrom(msg.sender, address(this), amountToContribute);
         if (!success) revert TokenizationCampaign__TransferFailed();
+
+        /// emit event
         emit SharesBought(msg.sender, _sharesAmount, amountToContribute);
     }
 
@@ -129,6 +131,9 @@ contract TokenizationCampaign {
         /// Interactions - transfer the tokens representing shares to the buyer
         bool success = assetToken.transfer(msg.sender, sharesToRedeem);
         if (!success) revert TokenizationCampaign__TransferFailed();
+
+        /// emit event
+        emit SharesRedeemed(msg.sender, sharesToRedeem);
     }
 
     function refund() external {}
