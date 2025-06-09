@@ -17,6 +17,7 @@ contract TokenizationCampaign {
     error TokenizationCampaign__NotFullyFundedYet();
     error TokenizationCampaign__CampaignStillActive();
     error TokenizationCampaign__NothingToRefund();
+    error TokenizationCampaign__CampaignNotSuccesful();
 
     /*//////////////////////////////////////////////////////////////////////////
                                   VARIABLES
@@ -160,5 +161,12 @@ contract TokenizationCampaign {
         emit UserRefunded(msg.sender, refundAmount);
     }
 
-    function finishCampaign() external onlyOrganizer {}
+    /// Once the campaign is succesfull, the organizer cand redeem the funds
+    /// @dev function is only meant to be called once the campaign is succesful
+    function redeemFunds() external onlyOrganizer {
+        if (!funded) revert TokenizationCampaign__CampaignNotSuccesful();
+        uint256 redeemAmount = IERC20(paymentToken).balanceOf(address(this));
+        bool success = IERC20(paymentToken).transfer(msg.sender, redeemAmount);
+        if (!success) revert TokenizationCampaign__TransferFailed();
+    }
 }
