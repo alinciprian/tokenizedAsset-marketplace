@@ -121,6 +121,8 @@ contract TokenizationCampaign {
         emit SharesBought(msg.sender, _sharesAmount, amountToContribute);
     }
 
+    /// Function allows user to redeem the tokens representing shares of the asset
+    /// @dev function is meant to be called only if the campaign was succesfull
     function redeemShares() external {
         /// Checks - check if the campaign was succesful
         if (!funded) revert TokenizationCampaign__NotFullyFundedYet();
@@ -138,6 +140,8 @@ contract TokenizationCampaign {
         emit SharesRedeemed(msg.sender, sharesToRedeem);
     }
 
+    /// Allows users to get refunded
+    /// @dev function is meant to pe called only if the deadline passed and the campaign is not fully funded.
     function refund() external {
         /// Checks
         /// check if the campaign is not succesful or if the deadline passed
