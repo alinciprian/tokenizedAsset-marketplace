@@ -15,6 +15,8 @@ contract TokenizationCampaign {
     error TokenizationCampaign__InvalidSharesAmount();
     error TokenizationCampaign__TransferFailed();
     error TokenizationCampaign__NotFullyFundedYet();
+    error TokenizationCampaign__CampaignStillActive();
+    error TokenizationCampaign__NothingToRefund();
 
     /*//////////////////////////////////////////////////////////////////////////
                                   VARIABLES
@@ -136,7 +138,23 @@ contract TokenizationCampaign {
         emit SharesRedeemed(msg.sender, sharesToRedeem);
     }
 
-    function refund() external {}
+    function refund() external {
+        /// Checks
+        /// check if the campaign is not succesful or if the deadline passed
+        if (!funded || block.timestamp < deadline) revert TokenizationCampaign__CampaignStillActive();
+        uint256 refundAmount = amountContributed[msg.sender];
+        if (refundAmount == 0) revert TokenizationCampaign__NothingToRefund();
+
+        /// Effects
+        amountContributed[msg.sender] = 0;
+
+        /// Interactions
+
+        bool success = IERC20(paymentToken).transfer(msg.sender, refundAmount);
+        if (!success) revert TokenizationCampaign__TransferFailed();
+
+        emit UserRefunded(msg.sender, refundAmount);
+    }
 
     function finishCampaign() external onlyOrganizer {}
 }
