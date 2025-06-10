@@ -3,8 +3,9 @@ pragma solidity 0.8.28;
 
 import {TokenizationCampaign} from "./TokenizationCampaign.sol";
 import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+
 /// @title CampaignFactory - Factory contract for deploying TokenizationCampaign instances
-/// @author
+/// @author AlinCiprian
 /// @notice This contract allows the contract owner to deploy new tokenized item investment campaigns
 /// @dev Deployed campaigns are tracked by the factory and associated with their organizer's address
 

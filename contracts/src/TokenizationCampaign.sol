@@ -59,6 +59,7 @@ contract TokenizationCampaign {
     event SharesBought(address indexed user, uint256 sharesAmount, uint256 contributedAmount);
     event SharesRedeemed(address indexed user, uint256 sharesAmount);
     event UserRefunded(address indexed user, uint256 amountRedunded);
+    event FundsRedeemed(address organizer, uint256 amountRedeemed);
 
     /*//////////////////////////////////////////////////////////////////////////
                                   MODIFIERS
@@ -175,5 +176,7 @@ contract TokenizationCampaign {
         uint256 redeemAmount = IERC20(paymentToken).balanceOf(address(this));
         bool success = IERC20(paymentToken).transfer(msg.sender, redeemAmount);
         if (!success) revert TokenizationCampaign__TransferFailed();
+
+        emit FundsRedeemed(msg.sender, redeemAmount);
     }
 }
