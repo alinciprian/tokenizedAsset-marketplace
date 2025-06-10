@@ -73,6 +73,13 @@ contract TokenizationCampaign {
                                   FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
+    /// @param _itemName Name of the item being tokenized
+    /// @param _symbol Symbol of the item being tokenized
+    /// @param _itemPrice The target price
+    /// @param _duration Duration of the campaign
+    /// @param _maxSharesPerUser The maximum amount of shares one user can buy
+    /// @param _paymentToken Address of the token used for payment for this campaign
+    /// @param _organizer The address of the organizer. This is the address than can redeem the funds
     constructor(
         string memory _itemName,
         string memory _symbol,
